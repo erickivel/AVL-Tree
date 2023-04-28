@@ -32,6 +32,15 @@ struct Node *createTree() {
 
   return root;
 }
+void updateHeight(struct Node *root) {
+  int leftHeight = root->left ? root->left->height : -1;
+  int rightHeight = root->right ? root->right->height : -1;
+
+  if (leftHeight > rightHeight)
+    root->height = leftHeight + 1;
+  else
+    root->height = rightHeight + 1;
+}
 
 void treeInsert(struct Node **root, int value) {
   if (!*root) {
@@ -47,22 +56,20 @@ void treeInsert(struct Node **root, int value) {
       struct Node *node = createNode(value);
       (*root)->left = node;
       node->parent = *root;
-
-      return;
+    } else {
+      treeInsert(&(*root)->left, value);
     }
-
-    treeInsert(&(*root)->left, value);
   } else {
     if (!(*root)->right) {
       struct Node *node = createNode(value);
       (*root)->right = node;
       node->parent = *root;
-
-      return;
+    } else {
+      treeInsert(&(*root)->right, value);
     }
-
-    treeInsert(&(*root)->right, value);
   }
+
+  updateHeight(*root);
 }
 
 void printTree(struct Node *root, int depth) {
@@ -74,11 +81,11 @@ void printTree(struct Node *root, int depth) {
 
   for (int i = 0; i < depth; i++) {
     if (depth - 1 == i)
-      printf("    +");
+      printf("     +");
     else
       printf("    ");
   }
-  printf("---%d\n", root->value);
+  printf("---%d-%d\n", root->value, root->height);
 
   printTree(root->left, depth + 1);
 }
