@@ -15,57 +15,54 @@ struct Node *createNode(int value) {
   newNode->right = NULL;
   newNode->parent = NULL;
   newNode->value = value;
+  newNode->height = 0;
 
   return newNode;
 }
 
-struct Tree *createTree() {
-  struct Tree *newTree = malloc(sizeof(struct Tree));
+struct Node *createTree() {
+  struct Node *root = malloc(sizeof(struct Node));
 
-  if (!newTree) {
+  if (!root) {
     printf("Error when creating tree");
     exit(1);
   }
 
-  newTree->root = NULL;
+  root = NULL;
 
-  return newTree;
+  return root;
 }
 
-void auxInsertTree(struct Node *root, int value) {
-  if (root->value > value) {
-    if (!root->left) {
-      struct Node *node = createNode(value);
-      root->left = node;
-      node->parent = root;
-
-      return;
-    }
-
-    auxInsertTree(root->left, value);
-  } else {
-    if (!root->right) {
-      struct Node *node = createNode(value);
-      root->right = node;
-      node->parent = root;
-
-      return;
-    }
-
-    auxInsertTree(root->right, value);
-  }
-}
-
-void treeInsert(struct Tree *tree, int value) {
-  if (!tree->root) {
+void treeInsert(struct Node **root, int value) {
+  if (!*root) {
     struct Node *node = createNode(value);
 
-    tree->root = node;
+    *root = node;
 
     return;
   }
 
-  auxInsertTree(tree->root, value);
+  if ((*root)->value > value) {
+    if (!(*root)->left) {
+      struct Node *node = createNode(value);
+      (*root)->left = node;
+      node->parent = *root;
+
+      return;
+    }
+
+    treeInsert(&(*root)->left, value);
+  } else {
+    if (!(*root)->right) {
+      struct Node *node = createNode(value);
+      (*root)->right = node;
+      node->parent = *root;
+
+      return;
+    }
+
+    treeInsert(&(*root)->right, value);
+  }
 }
 
 void printTree(struct Node *root, int depth) {

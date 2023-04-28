@@ -3,18 +3,15 @@
 
 struct Node {
   int value;
+  int height;
   struct Node *parent;
   struct Node *left;
   struct Node *right;
 };
 
-struct Tree {
-  struct Node *root;
-};
+struct Node *createTree(void);
 
-struct Tree *createTree(void);
-
-void treeInsert(struct Tree *Tree, int value);
+void treeInsert(struct Node **root, int value);
 
 void printTree(struct Node *root, int depth);
 

@@ -1,20 +1,20 @@
 #include "../include/tree.h"
 
 int main(void) {
-  struct Tree *tree = createTree();
+  struct Node *root = createTree();
 
-  treeInsert(tree, 4);
-  treeInsert(tree, 2);
-  treeInsert(tree, 6);
-  treeInsert(tree, 7);
-  treeInsert(tree, 3);
-  treeInsert(tree, 1);
-  treeInsert(tree, 5);
-  treeInsert(tree, 5);
-  treeInsert(tree, 5);
-  treeInsert(tree, 5);
+  treeInsert(&root, 4);
+  treeInsert(&root, 2);
+  treeInsert(&root, 6);
+  treeInsert(&root, 7);
+  treeInsert(&root, 3);
+  treeInsert(&root, 1);
+  treeInsert(&root, 5);
+  treeInsert(&root, 5);
+  treeInsert(&root, 5);
+  treeInsert(&root, 5);
 
-  printTree(tree->root, 0);
+  printTree(root, 0);
 
   return 0;
 }
