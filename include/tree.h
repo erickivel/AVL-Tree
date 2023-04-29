@@ -13,6 +13,10 @@ struct Node *createTree(void);
 
 void treeInsert(struct Node **root, int value);
 
+void treeDelete(struct Node **root, int value);
+
+void printInOrder(struct Node *root, int depth);
+
 void printTree(struct Node *root, int depth);
 
 #endif

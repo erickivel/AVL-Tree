@@ -1,20 +1,26 @@
+#include <stdio.h>
+
 #include "../include/tree.h"
 
 int main(void) {
   struct Node *root = createTree();
+  char operation;
+  int num;
 
-  treeInsert(&root, 4);
-  treeInsert(&root, 2);
-  treeInsert(&root, 6);
-  treeInsert(&root, 7);
-  treeInsert(&root, 3);
-  treeInsert(&root, 1);
-  treeInsert(&root, 5);
-  treeInsert(&root, 5);
-  treeInsert(&root, 5);
-  treeInsert(&root, 5);
+  while (!feof(stdin)) {
+    scanf("%c %d", &operation, &num);
+
+    if (operation == 'i') {
+      treeInsert(&root, num);
+    } else if (operation == 'r') {
+      treeDelete(&root, num);
+    }
+  }
 
   printTree(root, 0);
+
+  printf("\n\n===========\n\n");
+  printInOrder(root, 0);
 
   return 0;
 }
