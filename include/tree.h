@@ -9,8 +9,6 @@ struct Node {
   struct Node *right;
 };
 
-struct Node *createTree(void);
-
 void treeInsert(struct Node **root, int value);
 
 void treeDelete(struct Node **root, int value);

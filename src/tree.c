@@ -20,27 +20,11 @@ struct Node *createNode(int value) {
   return newNode;
 }
 
-struct Node *createTree() {
-  struct Node *root = malloc(sizeof(struct Node));
-
-  if (!root) {
-    printf("Error when creating tree");
-    exit(1);
-  }
-
-  root = NULL;
-
-  return root;
-}
-
 void updateHeight(struct Node *root) {
   int leftHeight = root->left ? root->left->height : -1;
   int rightHeight = root->right ? root->right->height : -1;
 
-  if (leftHeight > rightHeight)
-    root->height = leftHeight + 1;
-  else
-    root->height = rightHeight + 1;
+  root->height = leftHeight > rightHeight ? leftHeight + 1 : rightHeight + 1;
 }
 
 int balanceFactor(struct Node *root) {
@@ -76,8 +60,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
     y->parent = x->parent;
     x->parent = y;
 
-    // *root = y;
-
     updateHeight(x);
     updateHeight(y);
     return y;
@@ -107,8 +89,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
 
     y->parent = x->parent;
     x->parent = y;
-
-    // *root = y;
 
     updateHeight(x);
     updateHeight(y);
@@ -146,8 +126,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
 
     y->parent = x->parent;
     x->parent = y;
-
-    // *root = y;
 
     updateHeight(x);
     updateHeight(z);
@@ -187,8 +165,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
     y->parent = x->parent;
     x->parent = y;
 
-    // *root = y;
-
     updateHeight(x);
     updateHeight(z);
     updateHeight(y);
@@ -200,10 +176,7 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
 
 void treeInsert(struct Node **root, int value) {
   if (!*root) {
-    struct Node *node = createNode(value);
-
-    *root = node;
-
+    *root = createNode(value);
     return;
   }
 
@@ -213,10 +186,6 @@ void treeInsert(struct Node **root, int value) {
       (*root)->left = node;
       node->parent = *root;
 
-      // printf("Node to insert: %d\n", node->value);
-      // if (node->parent)
-      //   printf("Parent Node to insert: %d\n", node->parent->value);
-
     } else {
       treeInsert(&(*root)->left, value);
     }
@@ -225,10 +194,6 @@ void treeInsert(struct Node **root, int value) {
       struct Node *node = createNode(value);
       (*root)->right = node;
       node->parent = *root;
-
-      // printf("Node to insert: %d\n", node->value);
-      // if (node->parent)
-      //   printf("Parent Node to insert: %d\n", node->parent->value);
 
     } else {
       treeInsert(&(*root)->right, value);
@@ -242,10 +207,6 @@ void treeInsert(struct Node **root, int value) {
   if (abs(balanceFactorNum) > 1) {
     *root = balanceTree(balanceFactorNum, root);
   }
-
-  // printf("=========\n");
-  // printTree(*root, 0);
-  // printf("=========\n");
 }
 
 struct Node *treeMax(struct Node *root) {
@@ -260,11 +221,15 @@ void treeDelete(struct Node **root, int value) {
     return;
   }
 
-  if ((*root)->value == value) {
-    // Remove
+  // Binary search
+  if ((*root)->value > value) {
+    treeDelete(&(*root)->left, value);
+  } else if ((*root)->value < value) {
+    treeDelete(&(*root)->right, value);
+  } else if ((*root)->value == value) {
 
+    // Remove
     if (!(*root)->left || !(*root)->right) {
-      printf("unique son deleting: %d\n", (*root)->value);
       struct Node *child = (*root)->left ? (*root)->left : (*root)->right;
 
       if (child) {
@@ -287,9 +252,6 @@ void treeDelete(struct Node **root, int value) {
         antecessor = treeMax((*root)->parent->parent->left);
       }
 
-      printf("Antecessor: %d\n", antecessor->value);
-      printf("Antecessor parent: %d\n", antecessor->parent->value);
-
       (*root)->value = antecessor->value;
 
       // Point antecessor parent to null
@@ -300,18 +262,9 @@ void treeDelete(struct Node **root, int value) {
 
       free(antecessor);
     }
-
-  } else if ((*root)->value > value) {
-    treeDelete(&(*root)->left, value);
-  } else {
-    treeDelete(&(*root)->right, value);
   }
 
   updateHeight(*root);
-
-  printf("=====\n");
-  printTree(*root, 0);
-  printf("=====\n");
 
   int balanceFactorNum = balanceFactor(*root);
 
@@ -327,6 +280,16 @@ void printInOrder(struct Node *root, int depth) {
   printInOrder(root->left, depth + 1);
   printf("%d,%d\n", root->value, depth);
   printInOrder(root->right, depth + 1);
+}
+
+void freeTree(struct Node *root) {
+  if (!root)
+    return;
+
+  freeTree(root->left);
+  freeTree(root->right);
+
+  free(root);
 }
 
 void printTree(struct Node *root, int depth) {
@@ -345,15 +308,4 @@ void printTree(struct Node *root, int depth) {
   printf("---%d-%d\n", root->value, root->height);
 
   printTree(root->left, depth + 1);
-}
-
-void freeTree(struct Node *root) {
-  if (!root)
-    return;
-
-  freeTree(root->left);
-  freeTree(root->right);
-
-  printf("Freeing: %d\n", root->value);
-  free(root);
 }
