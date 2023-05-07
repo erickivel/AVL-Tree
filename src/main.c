@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../include/tree.h"
 
 int main(void) {
-  struct Node *root = createTree();
+  struct Node *root = NULL;
   char operation;
   int num;
 
@@ -21,6 +22,8 @@ int main(void) {
 
   printf("\n\n===========\n\n");
   printInOrder(root, 0);
+
+  freeTree(root);
 
   return 0;
 }

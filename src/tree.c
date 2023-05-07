@@ -50,7 +50,7 @@ int balanceFactor(struct Node *root) {
   return leftHeight - rightHeight;
 }
 
-void balanceTree(int balanceFactorNum, struct Node **root) {
+struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
   // RR
   if (balanceFactorNum < 0 && balanceFactor((*root)->right) <= 0) {
     printf("Right Right\n");
@@ -58,7 +58,6 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
     struct Node *x = *root;
     struct Node *y = x->right;
     x->right = y->left;
-    y->left = x;
 
     // Update x parent
     if (x->parent) {
@@ -69,14 +68,19 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
       }
     }
 
+    if (y->left)
+      y->left->parent = x;
+
+    y->left = x;
+
     y->parent = x->parent;
     x->parent = y;
 
-    *root = y;
+    // *root = y;
 
     updateHeight(x);
     updateHeight(y);
-    return;
+    return y;
   }
 
   // LL
@@ -86,7 +90,6 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
     struct Node *x = *root;
     struct Node *y = x->left;
     x->left = y->right;
-    y->right = x;
 
     // Update x parent
     if (x->parent) {
@@ -97,14 +100,19 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
       }
     }
 
+    if (y->right)
+      y->right->parent = x;
+
+    y->right = x;
+
     y->parent = x->parent;
     x->parent = y;
 
-    *root = y;
+    // *root = y;
 
     updateHeight(x);
     updateHeight(y);
-    return;
+    return y;
   }
 
   // RL
@@ -118,7 +126,13 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
     x->right = y->left;
     z->left = y->right;
     z->parent = y;
+
+    if (y->left)
+      y->left->parent = x;
     y->left = x;
+
+    if (y->right)
+      y->right->parent = z;
     y->right = z;
 
     // Update x parent
@@ -133,12 +147,12 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
     y->parent = x->parent;
     x->parent = y;
 
-    *root = y;
+    // *root = y;
 
     updateHeight(x);
     updateHeight(z);
     updateHeight(y);
-    return;
+    return y;
   }
 
   // LR
@@ -152,11 +166,17 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
     x->left = y->right;
     z->right = y->left;
     z->parent = y;
+
+    if (y->right)
+      y->right->parent = x;
     y->right = x;
+
+    if (y->left)
+      y->left->parent = z;
     y->left = z;
 
+    // Update x parent
     if (x->parent) {
-      // Update x parent
       if (x->parent->right == x) {
         x->parent->right = y;
       } else if (x->parent->left == x) {
@@ -167,13 +187,15 @@ void balanceTree(int balanceFactorNum, struct Node **root) {
     y->parent = x->parent;
     x->parent = y;
 
-    *root = y;
+    // *root = y;
 
     updateHeight(x);
     updateHeight(z);
     updateHeight(y);
-    return;
+    return y;
   }
+
+  return *root;
 }
 
 void treeInsert(struct Node **root, int value) {
@@ -190,6 +212,11 @@ void treeInsert(struct Node **root, int value) {
       struct Node *node = createNode(value);
       (*root)->left = node;
       node->parent = *root;
+
+      // printf("Node to insert: %d\n", node->value);
+      // if (node->parent)
+      //   printf("Parent Node to insert: %d\n", node->parent->value);
+
     } else {
       treeInsert(&(*root)->left, value);
     }
@@ -198,6 +225,11 @@ void treeInsert(struct Node **root, int value) {
       struct Node *node = createNode(value);
       (*root)->right = node;
       node->parent = *root;
+
+      // printf("Node to insert: %d\n", node->value);
+      // if (node->parent)
+      //   printf("Parent Node to insert: %d\n", node->parent->value);
+
     } else {
       treeInsert(&(*root)->right, value);
     }
@@ -208,8 +240,12 @@ void treeInsert(struct Node **root, int value) {
   int balanceFactorNum = balanceFactor(*root);
 
   if (abs(balanceFactorNum) > 1) {
-    balanceTree(balanceFactorNum, root);
+    *root = balanceTree(balanceFactorNum, root);
   }
+
+  // printf("=========\n");
+  // printTree(*root, 0);
+  // printf("=========\n");
 }
 
 struct Node *treeMax(struct Node *root) {
@@ -226,41 +262,45 @@ void treeDelete(struct Node **root, int value) {
 
   if ((*root)->value == value) {
     // Remove
-    struct Node *antecessor;
 
-    if ((*root)->left) {
-      antecessor = treeMax((*root)->left);
-    } else if ((*root)->parent->right == *root) {
-      antecessor = treeMax((*root)->parent->left);
+    if (!(*root)->left || !(*root)->right) {
+      printf("unique son deleting: %d\n", (*root)->value);
+      struct Node *child = (*root)->left ? (*root)->left : (*root)->right;
+
+      if (child) {
+        *root = child;
+      } else {
+        child = *root;
+        *root = NULL;
+      }
+
+      free(child);
+      return;
     } else {
-      antecessor = treeMax((*root)->parent->parent->left);
+      struct Node *antecessor;
+
+      if ((*root)->left) {
+        antecessor = treeMax((*root)->left);
+      } else if ((*root)->parent->right == *root) {
+        antecessor = treeMax((*root)->parent->left);
+      } else {
+        antecessor = treeMax((*root)->parent->parent->left);
+      }
+
+      printf("Antecessor: %d\n", antecessor->value);
+      printf("Antecessor parent: %d\n", antecessor->parent->value);
+
+      (*root)->value = antecessor->value;
+
+      // Point antecessor parent to null
+      if (antecessor->parent->right == antecessor) {
+        antecessor->parent->right = NULL;
+      } else
+        antecessor->parent->left = NULL;
+
+      free(antecessor);
     }
 
-    printf("Antecessor: %d\n", antecessor->value);
-    printf("Antecessor parent: %d\n", antecessor->parent->value);
-
-    // // Point antecessor parent to null
-    // if (antecessor->parent->right == antecessor) {
-    //   antecessor->parent->right = NULL;
-    // } else
-    //   antecessor->parent->left = NULL;
-
-    // if ((*root)->left != antecessor) {
-    //   antecessor->left = (*root)->left;
-    // }
-    // antecessor->right = (*root)->right;
-
-    // // Point root parent to antecessor
-    // antecessor->parent = (*root)->parent;
-    // if ((*root)->parent) {
-    //   if ((*root)->parent->left == *root) {
-    //     (*root)->parent->left = antecessor;
-    //   } else if ((*root)->parent->right == *root) {
-    //     (*root)->parent->right = antecessor;
-    //   }
-    // }
-
-    // *root = antecessor;
   } else if ((*root)->value > value) {
     treeDelete(&(*root)->left, value);
   } else {
@@ -269,14 +309,14 @@ void treeDelete(struct Node **root, int value) {
 
   updateHeight(*root);
 
-  // printf("=====\n");
-  // printTree(*root, 0);
-  // printf("=====\n");
+  printf("=====\n");
+  printTree(*root, 0);
+  printf("=====\n");
 
   int balanceFactorNum = balanceFactor(*root);
 
   if (abs(balanceFactorNum) > 1) {
-    balanceTree(balanceFactorNum, root);
+    *root = balanceTree(balanceFactorNum, root);
   }
 }
 
@@ -305,4 +345,15 @@ void printTree(struct Node *root, int depth) {
   printf("---%d-%d\n", root->value, root->height);
 
   printTree(root->left, depth + 1);
+}
+
+void freeTree(struct Node *root) {
+  if (!root)
+    return;
+
+  freeTree(root->left);
+  freeTree(root->right);
+
+  printf("Freeing: %d\n", root->value);
+  free(root);
 }
