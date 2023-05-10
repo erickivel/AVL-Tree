@@ -37,7 +37,6 @@ int balanceFactor(struct Node *root) {
 struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
   // RR
   if (balanceFactorNum < 0 && balanceFactor((*root)->right) <= 0) {
-    printf("Right Right\n");
 
     struct Node *x = *root;
     struct Node *y = x->right;
@@ -67,7 +66,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
 
   // LL
   if (balanceFactorNum > 0 && balanceFactor((*root)->left) >= 0) {
-    printf("Left Left\n");
 
     struct Node *x = *root;
     struct Node *y = x->left;
@@ -97,7 +95,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
 
   // RL
   if (balanceFactorNum < 0 && balanceFactor((*root)->right) > 0) {
-    printf("Right Left\n");
 
     struct Node *x = *root;
     struct Node *z = x->right;
@@ -135,7 +132,6 @@ struct Node *balanceTree(int balanceFactorNum, struct Node **root) {
 
   // LR
   if (balanceFactorNum > 0 && balanceFactor((*root)->left) < 0) {
-    printf("Left Right\n");
 
     struct Node *x = *root;
     struct Node *z = x->left;
@@ -189,7 +185,7 @@ void treeInsert(struct Node **root, int value) {
     } else {
       treeInsert(&(*root)->left, value);
     }
-  } else {
+  } else if ((*root)->value < value) {
     if (!(*root)->right) {
       struct Node *node = createNode(value);
       (*root)->right = node;
@@ -198,6 +194,9 @@ void treeInsert(struct Node **root, int value) {
     } else {
       treeInsert(&(*root)->right, value);
     }
+  } else {
+    // Don't include
+    return;
   }
 
   updateHeight(*root);
@@ -233,7 +232,11 @@ void treeDelete(struct Node **root, int value) {
       struct Node *child = (*root)->left ? (*root)->left : (*root)->right;
 
       if (child) {
-        *root = child;
+        printf("awdhawdkjh: %d\n", child->value);
+        // *root = child;
+        (*root)->value = child->value;
+        (*root)->right = NULL;
+        (*root)->left = NULL;
       } else {
         child = *root;
         *root = NULL;
