@@ -226,18 +226,18 @@ void treeDelete(struct Node **root, int value) {
   } else if ((*root)->value < value) {
     treeDelete(&(*root)->right, value);
   } else if ((*root)->value == value) {
-
     // Remove
+
     if (!(*root)->left || !(*root)->right) {
       struct Node *child = (*root)->left ? (*root)->left : (*root)->right;
 
       if (child) {
         printf("awdhawdkjh: %d\n", child->value);
-        // *root = child;
         (*root)->value = child->value;
         (*root)->right = NULL;
         (*root)->left = NULL;
       } else {
+        printf("No children: %d\n", (*root)->parent->value);
         child = *root;
         *root = NULL;
       }
@@ -245,25 +245,39 @@ void treeDelete(struct Node **root, int value) {
       free(child);
       return;
     } else {
-      struct Node *antecessor;
+      // struct Node *predecessor = treeMax((*root)->left);
+      struct Node *predecessor;
 
       if ((*root)->left) {
-        antecessor = treeMax((*root)->left);
+        predecessor = treeMax((*root)->left);
       } else if ((*root)->parent->right == *root) {
-        antecessor = treeMax((*root)->parent->left);
+        predecessor = treeMax((*root)->parent->left);
       } else {
-        antecessor = treeMax((*root)->parent->parent->left);
+        predecessor = treeMax((*root)->parent->parent->left);
       }
 
-      (*root)->value = antecessor->value;
+      printf("predecessor: %d \n", predecessor->parent->value);
 
-      // Point antecessor parent to null
-      if (antecessor->parent->right == antecessor) {
-        antecessor->parent->right = NULL;
+      // Point predecessor parent to null
+      if (predecessor->parent->right == predecessor) {
+        predecessor->parent->right = predecessor->left;
       } else
-        antecessor->parent->left = NULL;
+        predecessor->parent->left = predecessor->left;
 
-      free(antecessor);
+      (*root)->value = predecessor->value;
+
+      struct Node *predP = predecessor->parent;
+
+      while (predP && predP != *root) {
+        updateHeight(predP);
+        int balanceFactorNum2 = balanceFactor(predP);
+        if (abs(balanceFactorNum2) > 1) {
+          predP = balanceTree(balanceFactorNum2, &predP);
+        }
+        predP = predP->parent;
+      }
+
+      free(predecessor);
     }
   }
 
